@@ -5,9 +5,10 @@ import styles from "./styles.scss";
 const ChannelsModal = ({
   isOpen,
   channels,
+  channelUsageMap,
   closeModal,
   receiver,
-  selectChannel,
+  selectChannel
 }) => (
   <Modal isOpen={isOpen} closeModal={closeModal}>
     <div className={styles.header}>
@@ -30,7 +31,11 @@ const ChannelsModal = ({
             }}
             key={channel.c_id}
           >
-            {channel.c_description}
+            {`${channel.c_description} ${
+              channelUsageMap[channel.c_name]
+                ? "(" + channelUsageMap[channel.c_name] + ")"
+                : ""
+            }`}
           </div>
         ))}
     </div>

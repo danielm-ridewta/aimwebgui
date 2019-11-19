@@ -11,6 +11,7 @@ import {
   getPresets,
   connectChannel,
   connectPreset,
+  AIM_DispatchUtilsLogin
 } from "./aimApiClient";
 import styles from "./styles.scss";
 
@@ -31,7 +32,7 @@ class App extends Component {
       modalReceiver: null,
       isPresetsModalOpen: false,
       isLoading: false,
-      error: null,
+      error: null
     };
   }
 
@@ -44,29 +45,44 @@ class App extends Component {
       dispatchVideoUser,
       ""
     );
+    const { error: AIM_DispatchutilsLoginError } = await AIM_DispatchUtilsLogin(
+      "AIM_Dispatchutils",
+      "2d64f62d67"
+    );
 
-    if (loginError || dispatchVideoLoginError) {
+    if (loginError || dispatchVideoLoginError || AIM_DispatchutilsLoginError) {
       this.setState({
         isLoading: false,
         error: {
           context: "componentDidMount.login",
-          message: loginError || dispatchVideoLoginError,
-        },
+          message: loginError || dispatchVideoLoginError
+        }
       });
       return;
     }
 
     const { devices, error: getDevicesError } = await getDevices();
+    const { devices: allDevices, error: getAllDevicesError } = await getDevices(
+      {
+        useAIM_DispatchutilsToken: true
+      }
+    );
     const { channels, error: getChannelsError } = await getChannels();
     const { presets, error: getPresetsError } = await getPresets();
 
-    if (getDevicesError || getChannelsError || getPresetsError) {
+    if (
+      getDevicesError ||
+      getAllDevicesError ||
+      getChannelsError ||
+      getPresetsError
+    ) {
       this.setState({
         isLoading: false,
         error: {
-          context: "componentDidMount.getDevices|getChannels|getPresets",
-          message: getDevicesError || getChannelsError || getPresetsError,
-        },
+          context:
+            "componentDidMount.getDevices|getAllDevices|getChannels|getPresets",
+          message: getDevicesError || getChannelsError || getPresetsError
+        }
       });
       return;
     }
@@ -76,11 +92,12 @@ class App extends Component {
       receiverTwo,
       receiverThree,
       receiverVideoOne,
-      receiverVideoTwo,
+      receiverVideoTwo
     } = this.mapReceivers(devices, channels);
 
     this.setState({
       devices,
+      allDevices,
       channels,
       presets,
       receiverOne,
@@ -88,14 +105,14 @@ class App extends Component {
       receiverThree,
       receiverVideoOne,
       receiverVideoTwo,
-      isLoading: false,
+      isLoading: false
     });
   }
 
   openChannelsModal = receiver => {
     this.setState({
       isChannelsModalOpen: true,
-      modalReceiver: receiver,
+      modalReceiver: receiver
     });
   };
 
@@ -137,7 +154,7 @@ class App extends Component {
         deviceName: deviceOne.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceOne.c_name,
-        channelDescription: deviceChannel.c_description,
+        channelDescription: deviceChannel.c_description
       };
     }
 
@@ -151,7 +168,7 @@ class App extends Component {
         deviceName: deviceTwo.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceTwo.c_name,
-        channelDescription: deviceChannel.c_description,
+        channelDescription: deviceChannel.c_description
       };
     }
 
@@ -167,7 +184,7 @@ class App extends Component {
           deviceName: deviceThree.d_name,
           channelId: deviceChannel.c_id,
           channelName: deviceThree.c_name,
-          channelDescription: deviceChannel.c_description,
+          channelDescription: deviceChannel.c_description
         };
       }
     }
@@ -182,7 +199,7 @@ class App extends Component {
         deviceName: deviceVideoOne.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceVideoOne.c_name,
-        channelDescription: deviceChannel.c_description,
+        channelDescription: deviceChannel.c_description
       };
     }
 
@@ -196,7 +213,7 @@ class App extends Component {
         deviceName: deviceVideoTwo.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceVideoTwo.c_name,
-        channelDescription: deviceChannel.c_description,
+        channelDescription: deviceChannel.c_description
       };
     }
 
@@ -205,7 +222,7 @@ class App extends Component {
       receiverTwo,
       receiverThree,
       receiverVideoOne,
-      receiverVideoTwo,
+      receiverVideoTwo
     };
   };
 
@@ -213,7 +230,7 @@ class App extends Component {
     this.setState({ isLoading: true, isChannelsModalOpen: false });
     const {
       receiverVideoOne: { deviceId: dispatchVideoDeviceOneId },
-      receiverVideoTwo: { deviceId: dispatchVideoDeviceTwoId },
+      receiverVideoTwo: { deviceId: dispatchVideoDeviceTwoId }
     } = this.state;
     let useDispatchVideoToken = false;
     if (
@@ -233,8 +250,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "selectChannel.connectChannel",
-          message: response.error,
-        },
+          message: response.error
+        }
       });
       return;
     }
@@ -245,8 +262,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "selectChannel.getDevices",
-          message: getDevicesError,
-        },
+          message: getDevicesError
+        }
       });
       return;
     }
@@ -257,7 +274,7 @@ class App extends Component {
       receiverTwo,
       receiverThree,
       receiverVideoOne,
-      receiverVideoTwo,
+      receiverVideoTwo
     } = this.mapReceivers(devices, channels);
 
     this.setState({
@@ -267,7 +284,7 @@ class App extends Component {
       receiverThree,
       receiverVideoOne,
       receiverVideoTwo,
-      isLoading: false,
+      isLoading: false
     });
   };
 
@@ -282,8 +299,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "swapChannels.connectChannelA",
-          message: responseA.error,
-        },
+          message: responseA.error
+        }
       });
       return;
     }
@@ -294,8 +311,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "swapChannels.connectChannelB",
-          message: responseB.error,
-        },
+          message: responseB.error
+        }
       });
       return;
     }
@@ -304,7 +321,7 @@ class App extends Component {
     if (getDevicesError) {
       this.setState({
         isLoading: false,
-        error: { context: "swapChannels.getDevices", message: getDevicesError },
+        error: { context: "swapChannels.getDevices", message: getDevicesError }
       });
       return;
     }
@@ -319,7 +336,7 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
-      isLoading: false,
+      isLoading: false
     });
   };
 
@@ -332,8 +349,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "selectPreset.connectPreset",
-          message: response.error,
-        },
+          message: response.error
+        }
       });
       return;
     }
@@ -342,7 +359,7 @@ class App extends Component {
     if (getDevicesError) {
       this.setState({
         isLoading: false,
-        error: { context: "selectPreset.getDevices", message: getDevicesError },
+        error: { context: "selectPreset.getDevices", message: getDevicesError }
       });
       return;
     }
@@ -357,8 +374,27 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
-      isLoading: false,
+      isLoading: false
     });
+  };
+
+  mapChannelUsage = (devices, channels) => {
+    let filteredChannels = channels.filter(
+      c =>
+        !c.c_name.toLowerCase().includes("comp") &&
+        !c.c_name.toLowerCase().includes("facvid")
+    );
+
+    let channelUsageMap = {};
+    for (let channel of filteredChannels) {
+      const device = devices.find(d => d.c_name === channel.c_name) || null;
+      if (device) {
+        channelUsageMap[channel.c_name] =
+          device && device.d_name.substring(0, 2);
+      }
+    }
+
+    return channelUsageMap;
   };
 
   refresh = () => {
@@ -374,12 +410,13 @@ class App extends Component {
       receiverVideoTwo,
       channels,
       devices,
+      allDevices,
       presets,
       isChannelsModalOpen,
       modalReceiver,
       isPresetsModalOpen,
       isLoading,
-      error,
+      error
     } = this.state;
 
     if (error) {
@@ -394,13 +431,15 @@ class App extends Component {
       );
     }
 
-    if (!channels && !devices && !presets) {
+    if (!channels && !devices && !allDevices && !presets) {
       return (
         <div className={styles.loadingSpinner}>
           <LoadingSpinner />
         </div>
       );
     }
+
+    let channelUsageMap = this.mapChannelUsage(allDevices, channels);
 
     return (
       <div className={styles.app}>
@@ -474,6 +513,7 @@ class App extends Component {
         <ChannelsModal
           isOpen={isChannelsModalOpen}
           channels={channels}
+          channelUsageMap={channelUsageMap}
           closeModal={this.closeChannelsModal}
           receiver={modalReceiver}
           selectChannel={this.selectChannel}

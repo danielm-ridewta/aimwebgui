@@ -1,6 +1,7 @@
 const aimApiBaseUrl = "http://srvwebnode3:3030/v1";
 let token = "";
 let dispatchVideoToken = "";
+let AIM_DispatchutilsToken = "";
 
 function buildQueryString(parameters) {
   return Object.keys(parameters).reduce((acc, cur, idx, arr) => {
@@ -16,7 +17,7 @@ async function fetchJson(url, { method, body } = {}) {
     response = await fetch(url, {
       method,
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body)
     });
   } else {
     response = await fetch(url);
@@ -29,13 +30,31 @@ async function fetchJson(url, { method, body } = {}) {
   return json;
 }
 
+export async function AIM_DispatchUtilsLogin(username, password) {
+  const response = await fetchJson(`${aimApiBaseUrl}/login`, {
+    method: "POST",
+    body: {
+      username,
+      password
+    }
+  });
+
+  if (response.error) {
+    return { error: response.error };
+  }
+
+  AIM_DispatchutilsToken = response.token;
+
+  return response;
+}
+
 export async function dispatchVideoLogin(username, password) {
   const response = await fetchJson(`${aimApiBaseUrl}/login`, {
     method: "POST",
     body: {
       username,
-      password,
-    },
+      password
+    }
   });
 
   if (response.error) {
@@ -52,8 +71,8 @@ export async function login(username, password) {
     method: "POST",
     body: {
       username,
-      password,
-    },
+      password
+    }
   });
 
   if (response.error) {
@@ -65,9 +84,11 @@ export async function login(username, password) {
   return response;
 }
 
-export async function getDevices() {
+export async function getDevices(useAIM_DispatchutilsToken = false) {
   const response = await fetchJson(
-    `${aimApiBaseUrl}/devices${buildQueryString({ token })}`
+    `${aimApiBaseUrl}/devices${buildQueryString({
+      token: useAIM_DispatchutilsToken ? AIM_DispatchutilsToken : token
+    })}`
   );
 
   if (response.error) {
@@ -77,7 +98,7 @@ export async function getDevices() {
   return response;
 }
 
-export async function getChannels(query) {
+export async function getChannels() {
   const response = await fetchJson(
     `${aimApiBaseUrl}/channels${buildQueryString({ token })}`
   );
@@ -88,7 +109,7 @@ export async function getChannels(query) {
   return response;
 }
 
-export async function getPresets(query) {
+export async function getPresets() {
   const response = await fetchJson(
     `${aimApiBaseUrl}/presets${buildQueryString({ token })}`
   );
@@ -107,10 +128,10 @@ export async function connectChannel(
   const response = await fetchJson(
     `${aimApiBaseUrl}/channels/${channelId}/connect${buildQueryString({
       token: useDispatchVideoToken ? dispatchVideoToken : token,
-      deviceId,
+      deviceId
     })}`,
     {
-      method: "POST",
+      method: "POST"
     }
   );
 
@@ -125,7 +146,7 @@ export async function connectPreset(presetId) {
   const response = await fetchJson(
     `${aimApiBaseUrl}/presets/connect${buildQueryString({ token, presetId })}`,
     {
-      method: "POST",
+      method: "POST"
     }
   );
 
