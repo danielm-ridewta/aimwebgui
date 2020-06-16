@@ -1,7 +1,8 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import { ChannelsModal, PresetsModal } from "./components/modal";
 import MonitorSet from "./components/monitorSet";
-import SwapButton from "./components/swapButton";
+import TriangleLayout from "./components/triangleLayout";
+import TwoByFourLayout from "./components/twoByFourLayout";
 import LoadingSpinner from "./components/loadingSpinner";
 import {
   login,
@@ -11,7 +12,7 @@ import {
   getPresets,
   connectChannel,
   connectPreset,
-  AIM_DispatchUtilsLogin
+  AIM_DispatchUtilsLogin,
 } from "./aimApiClient";
 import styles from "./styles.scss";
 
@@ -23,22 +24,25 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      layout: null,
       receiverOne: null,
       receiverTwo: null,
       receiverThree: null,
+      receiverFour: null,
       receiverVideoOne: null,
       receiverVideoTwo: null,
       isChannelsModalOpen: false,
       modalReceiver: null,
       isPresetsModalOpen: false,
       isLoading: false,
-      error: null
+      error: null,
     };
   }
 
   async componentDidMount() {
     this.setState({ isLoading: true });
     const queryString = new URLSearchParams(window.location.search);
+    const layout = queryString.get("layout");
     const id = queryString.get("id");
     const { error: loginError } = await login(id, "");
     const { error: dispatchVideoLoginError } = await dispatchVideoLogin(
@@ -55,8 +59,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "componentDidMount.login",
-          message: loginError || dispatchVideoLoginError
-        }
+          message: loginError || dispatchVideoLoginError,
+        },
       });
       return;
     }
@@ -64,7 +68,7 @@ class App extends Component {
     const { devices, error: getDevicesError } = await getDevices();
     const { devices: allDevices, error: getAllDevicesError } = await getDevices(
       {
-        useAIM_DispatchutilsToken: true
+        useAIM_DispatchutilsToken: true,
       }
     );
     const { channels, error: getChannelsError } = await getChannels();
@@ -81,8 +85,8 @@ class App extends Component {
         error: {
           context:
             "componentDidMount.getDevices|getAllDevices|getChannels|getPresets",
-          message: getDevicesError || getChannelsError || getPresetsError
-        }
+          message: getDevicesError || getChannelsError || getPresetsError,
+        },
       });
       return;
     }
@@ -91,11 +95,13 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
+      receiverFour,
       receiverVideoOne,
-      receiverVideoTwo
+      receiverVideoTwo,
     } = this.mapReceivers(devices, channels);
 
     this.setState({
+      layout,
       devices,
       allDevices,
       channels,
@@ -103,16 +109,17 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
+      receiverFour,
       receiverVideoOne,
       receiverVideoTwo,
-      isLoading: false
+      isLoading: false,
     });
   }
 
-  openChannelsModal = receiver => {
+  openChannelsModal = (receiver) => {
     this.setState({
       isChannelsModalOpen: true,
-      modalReceiver: receiver
+      modalReceiver: receiver,
     });
   };
 
@@ -129,24 +136,27 @@ class App extends Component {
   };
 
   mapReceivers = (devices, channels) => {
+    console.log("devices", devices);
     const deviceOne = devices[0];
     const deviceTwo = devices[1];
     const deviceThree = devices[2];
+    const deviceFour = devices[4];
     const deviceVideoOne = devices.find(
-      d => d.d_name === dispatchVideoDeviceOne
+      (d) => d.d_name === dispatchVideoDeviceOne
     );
     const deviceVideoTwo = devices.find(
-      d => d.d_name === dispatchVideoDeviceTwo
+      (d) => d.d_name === dispatchVideoDeviceTwo
     );
     let receiverOne;
     let receiverTwo;
     let receiverThree;
+    let receiverFour;
     let receiverVideoOne;
     let receiverVideoTwo;
 
     if (deviceOne) {
       const deviceChannel = channels.find(
-        channel => deviceOne.c_name === channel.c_name
+        (channel) => deviceOne.c_name === channel.c_name
       );
 
       receiverOne = {
@@ -154,13 +164,13 @@ class App extends Component {
         deviceName: deviceOne.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceOne.c_name,
-        channelDescription: deviceChannel.c_description
+        channelDescription: deviceChannel.c_description,
       };
     }
 
     if (deviceTwo) {
       const deviceChannel = channels.find(
-        channel => deviceTwo.c_name === channel.c_name
+        (channel) => deviceTwo.c_name === channel.c_name
       );
 
       receiverTwo = {
@@ -168,14 +178,14 @@ class App extends Component {
         deviceName: deviceTwo.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceTwo.c_name,
-        channelDescription: deviceChannel.c_description
+        channelDescription: deviceChannel.c_description,
       };
     }
 
     // Dispatch 5 only has two receivers
     if (deviceThree && deviceOne.d_name.indexOf("D5RX") === -1) {
       const deviceChannel = channels.find(
-        channel => deviceThree.c_name === channel.c_name
+        (channel) => deviceThree.c_name === channel.c_name
       );
 
       if (deviceChannel) {
@@ -184,14 +194,33 @@ class App extends Component {
           deviceName: deviceThree.d_name,
           channelId: deviceChannel.c_id,
           channelName: deviceThree.c_name,
-          channelDescription: deviceChannel.c_description
+          channelDescription: deviceChannel.c_description,
         };
       }
     }
 
+    // Dispatch 5 only has two receivers
+    if (deviceFour && deviceOne.d_name.indexOf("D5RX") === -1) {
+      const deviceChannel = channels.find(
+        (channel) => deviceFour.c_name === channel.c_name
+      );
+      console.log("channels", channels);
+      console.log("deviceChannel", deviceChannel);
+      if (deviceChannel) {
+        receiverFour = {
+          deviceId: deviceFour.d_id,
+          deviceName: deviceFour.d_name,
+          channelId: deviceChannel.c_id,
+          channelName: deviceFour.c_name,
+          channelDescription: deviceChannel.c_description,
+        };
+      }
+      console.log("receiverFour", receiverFour);
+    }
+
     if (deviceVideoOne) {
       const deviceChannel = channels.find(
-        channel => deviceVideoOne.c_name === channel.c_name
+        (channel) => deviceVideoOne.c_name === channel.c_name
       );
 
       receiverVideoOne = {
@@ -199,13 +228,13 @@ class App extends Component {
         deviceName: deviceVideoOne.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceVideoOne.c_name,
-        channelDescription: deviceChannel.c_description
+        channelDescription: deviceChannel.c_description,
       };
     }
 
     if (deviceVideoTwo) {
       const deviceChannel = channels.find(
-        channel => deviceVideoTwo.c_name === channel.c_name
+        (channel) => deviceVideoTwo.c_name === channel.c_name
       );
 
       receiverVideoTwo = {
@@ -213,7 +242,7 @@ class App extends Component {
         deviceName: deviceVideoTwo.d_name,
         channelId: deviceChannel.c_id,
         channelName: deviceVideoTwo.c_name,
-        channelDescription: deviceChannel.c_description
+        channelDescription: deviceChannel.c_description,
       };
     }
 
@@ -221,8 +250,9 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
+      receiverFour,
       receiverVideoOne,
-      receiverVideoTwo
+      receiverVideoTwo,
     };
   };
 
@@ -230,7 +260,7 @@ class App extends Component {
     this.setState({ isLoading: true, isChannelsModalOpen: false });
     const {
       receiverVideoOne: { deviceId: dispatchVideoDeviceOneId },
-      receiverVideoTwo: { deviceId: dispatchVideoDeviceTwoId }
+      receiverVideoTwo: { deviceId: dispatchVideoDeviceTwoId },
     } = this.state;
     let useDispatchVideoToken = false;
     if (
@@ -250,8 +280,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "selectChannel.connectChannel",
-          message: response.error
-        }
+          message: response.error,
+        },
       });
       return;
     }
@@ -262,8 +292,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "selectChannel.getDevices",
-          message: getDevicesError
-        }
+          message: getDevicesError,
+        },
       });
       return;
     }
@@ -273,8 +303,9 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
+      receiverFour,
       receiverVideoOne,
-      receiverVideoTwo
+      receiverVideoTwo,
     } = this.mapReceivers(devices, channels);
 
     this.setState({
@@ -282,9 +313,10 @@ class App extends Component {
       receiverOne,
       receiverTwo,
       receiverThree,
+      receiverFour,
       receiverVideoOne,
       receiverVideoTwo,
-      isLoading: false
+      isLoading: false,
     });
   };
 
@@ -299,8 +331,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "swapChannels.connectChannelA",
-          message: responseA.error
-        }
+          message: responseA.error,
+        },
       });
       return;
     }
@@ -311,8 +343,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "swapChannels.connectChannelB",
-          message: responseB.error
-        }
+          message: responseB.error,
+        },
       });
       return;
     }
@@ -321,26 +353,29 @@ class App extends Component {
     if (getDevicesError) {
       this.setState({
         isLoading: false,
-        error: { context: "swapChannels.getDevices", message: getDevicesError }
+        error: { context: "swapChannels.getDevices", message: getDevicesError },
       });
       return;
     }
 
     const { channels } = this.state;
-    const { receiverOne, receiverTwo, receiverThree } = this.mapReceivers(
-      devices,
-      channels
-    );
+    const {
+      receiverOne,
+      receiverTwo,
+      receiverThree,
+      receiverFour,
+    } = this.mapReceivers(devices, channels);
 
     this.setState({
       receiverOne,
       receiverTwo,
       receiverThree,
-      isLoading: false
+      receiverFour,
+      isLoading: false,
     });
   };
 
-  selectPreset = async presetId => {
+  selectPreset = async (presetId) => {
     this.setState({ isLoading: true, isPresetsModalOpen: false });
     const response = await connectPreset(presetId);
 
@@ -349,8 +384,8 @@ class App extends Component {
         isLoading: false,
         error: {
           context: "selectPreset.connectPreset",
-          message: response.error
-        }
+          message: response.error,
+        },
       });
       return;
     }
@@ -359,35 +394,38 @@ class App extends Component {
     if (getDevicesError) {
       this.setState({
         isLoading: false,
-        error: { context: "selectPreset.getDevices", message: getDevicesError }
+        error: { context: "selectPreset.getDevices", message: getDevicesError },
       });
       return;
     }
 
     const { channels } = this.state;
-    const { receiverOne, receiverTwo, receiverThree } = this.mapReceivers(
-      devices,
-      channels
-    );
+    const {
+      receiverOne,
+      receiverTwo,
+      receiverThree,
+      receiverFour,
+    } = this.mapReceivers(devices, channels);
 
     this.setState({
       receiverOne,
       receiverTwo,
       receiverThree,
-      isLoading: false
+      receiverFour,
+      isLoading: false,
     });
   };
 
   mapChannelUsage = (devices, channels) => {
     let filteredChannels = channels.filter(
-      c =>
+      (c) =>
         !c.c_name.toLowerCase().includes("comp") &&
         !c.c_name.toLowerCase().includes("facvid")
     );
 
     let channelUsageMap = {};
     for (let channel of filteredChannels) {
-      const device = devices.find(d => d.c_name === channel.c_name) || null;
+      const device = devices.find((d) => d.c_name === channel.c_name) || null;
       if (device) {
         channelUsageMap[channel.c_name] =
           device && device.d_name.substring(0, 2);
@@ -403,9 +441,11 @@ class App extends Component {
 
   render() {
     const {
+      layout,
       receiverOne,
       receiverTwo,
       receiverThree,
+      receiverFour,
       receiverVideoOne,
       receiverVideoTwo,
       channels,
@@ -416,7 +456,7 @@ class App extends Component {
       modalReceiver,
       isPresetsModalOpen,
       isLoading,
-      error
+      error,
     } = this.state;
 
     if (error) {
@@ -464,51 +504,24 @@ class App extends Component {
               monitorHeight="150"
             />
           </div>
-          {receiverThree && (
-            <Fragment>
-              <div className={styles.topRow}>
-                <MonitorSet
-                  receiver={receiverThree}
-                  openChannelsModal={this.openChannelsModal}
-                />
-              </div>
-              <div className={styles.middleRow}>
-                <SwapButton
-                  className={styles.swapTopLeft}
-                  swapChannels={() => {
-                    this.swapChannels(receiverOne, receiverThree);
-                  }}
-                />
-                <div className={styles.spacer} />
-                <SwapButton
-                  className={styles.swapRightTop}
-                  swapChannels={() => {
-                    this.swapChannels(receiverTwo, receiverThree);
-                  }}
-                />
-              </div>
-            </Fragment>
-          )}
-          <div className={styles.bottomRow}>
-            <div className={styles.left}>
-              <MonitorSet
-                receiver={receiverOne}
-                openChannelsModal={this.openChannelsModal}
-              />
-            </div>
-            <SwapButton
-              className={styles.swapLeftRight}
-              swapChannels={() => {
-                this.swapChannels(receiverOne, receiverTwo);
-              }}
+          {layout === "2x4" ? (
+            <TwoByFourLayout
+              receiverOne={receiverOne}
+              receiverTwo={receiverTwo}
+              receiverThree={receiverThree}
+              receiverFour={receiverFour}
+              openChannelsModal={this.openChannelsModal}
+              swapChannels={this.swapChannels}
             />
-            <div className={styles.right}>
-              <MonitorSet
-                receiver={receiverTwo}
-                openChannelsModal={this.openChannelsModal}
-              />
-            </div>
-          </div>
+          ) : (
+            <TriangleLayout
+              receiverOne={receiverOne}
+              receiverTwo={receiverTwo}
+              receiverThree={receiverThree}
+              openChannelsModal={this.openChannelsModal}
+              swapChannels={this.swapChannels}
+            />
+          )}
         </div>
         <ChannelsModal
           isOpen={isChannelsModalOpen}

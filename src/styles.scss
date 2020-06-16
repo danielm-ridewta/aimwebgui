@@ -39,39 +39,6 @@
     margin: 40px;
   }
 
-  .top-row {
-    display: flex;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .middle-row {
-    display: flex;
-    width: 100%;
-    margin-bottom: 40px;
-    justify-content: space-around;
-  }
-
-  .bottom-row {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .swap-right-top {
-    margin-top: 4px;
-    transform: rotate(45deg);
-  }
-
-  .swap-top-left {
-    margin-bottom: 4px;
-    transform: rotate(135deg);
-  }
-
-  .swap-left-right {
-    margin: 0 40px;
-  }
-
   .error {
     margin: 20px;
   }

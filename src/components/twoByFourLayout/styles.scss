@@ -1,0 +1,39 @@
+:local {
+  .top-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .middle-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 40px;
+    justify-content: space-around;
+  }
+
+  .bottom-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .swap-top-left-bottom-right {
+    margin-top: 4px;
+    transform: rotate(30deg);
+  }
+
+  .swap-top-right-bottom-left {
+    margin-bottom: 4px;
+    transform: rotate(150deg);
+  }
+
+  .swap-top-bottom {
+    margin-bottom: 4px;
+    transform: rotate(90deg);
+  }
+
+  .swap-left-right {
+    margin: 0 40px;
+  }
+}
