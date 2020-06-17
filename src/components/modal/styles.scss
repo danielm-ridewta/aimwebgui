@@ -60,8 +60,28 @@
     }
   }
 
-  .selectedChannel {
+  .selected-channel {
     composes: channel;
     background: rgba(0, 0, 0, 0.2);
+  }
+
+  .channels-list {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .available-channels,
+  .in-use-channels {
+    flex: 1;
+  }
+
+  .available-channels {
+    border-right: 1px solid black;
+  }
+
+  .channel-status {
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
   }
 }
