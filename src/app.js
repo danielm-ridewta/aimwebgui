@@ -136,7 +136,6 @@ class App extends Component {
   };
 
   mapReceivers = (devices, channels) => {
-    console.log("devices", devices);
     const deviceOne = devices[0];
     const deviceTwo = devices[1];
     const deviceThree = devices[2];
@@ -204,8 +203,7 @@ class App extends Component {
       const deviceChannel = channels.find(
         (channel) => deviceFour.c_name === channel.c_name
       );
-      console.log("channels", channels);
-      console.log("deviceChannel", deviceChannel);
+
       if (deviceChannel) {
         receiverFour = {
           deviceId: deviceFour.d_id,
@@ -215,7 +213,6 @@ class App extends Component {
           channelDescription: deviceChannel.c_description,
         };
       }
-      console.log("receiverFour", receiverFour);
     }
 
     if (deviceVideoOne) {
